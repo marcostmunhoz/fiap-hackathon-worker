@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+# Check if docker executable exists, and the compose command is valid
+if [ ! -x "$(command -v docker)" ] || [ ! -x "$(command -v docker compose version)" ]; then
+  echo "Error: docker must be installed in order to set up the git hooks"
+
+  exit 1
+fi
+
+docker compose run --rm app composer pre-commit

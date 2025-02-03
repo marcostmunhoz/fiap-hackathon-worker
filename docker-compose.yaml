@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+      target: development
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    restart: "unless-stopped"
+
+  db:
+    build:
+      context: docker/db
+    ports:
+      - "3307:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    restart: "unless-stopped"
+
+  githooks:
+    build:
+      context: docker/githooks
+    volumes:
+      - ./.git:/tmp/.git
+    restart: "no"
+
+volumes:
+  db-data:
