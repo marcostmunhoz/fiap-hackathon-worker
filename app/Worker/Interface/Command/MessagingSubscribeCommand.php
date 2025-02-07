@@ -3,9 +3,11 @@
 namespace App\Worker\Interface\Command;
 
 use App\Shared\Domain\Enum\EventType;
+use App\Shared\Domain\ValueObject\Email;
 use App\Worker\Application\DTO\ExtractFramesFromUploadedVideoInput;
 use App\Worker\Application\UseCase\ExtractFramesFromUploadedVideoUseCase;
 use App\Worker\Domain\Service\MessageSubscriberInterface;
+use App\Worker\Interface\Job\QueueableUseCaseJob;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
 
@@ -23,20 +25,28 @@ class MessagingSubscribeCommand extends Command
         parent::__construct();
     }
 
-    public function handle(
-        ExtractFramesFromUploadedVideoUseCase $extractFramesFromUploadedVideoUseCase
-    ): void {
+    public function handle(): void
+    {
         $this->info('Subscribing to messaging service...');
 
-        $this->subscriber->on(EventType::VIDEO_UPLOADED, function (array $data) use ($extractFramesFromUploadedVideoUseCase) {
+        $this->subscriber->on(EventType::VIDEO_UPLOADED, function (array $data) {
             $filename = $data['filename'] ?? null;
+            $email = $data['user_email'] ?? null;
+            $name = $data['user_name'] ?? null;
 
-            if (!$filename) {
-                throw new InvalidArgumentException('Missing filename in message data.');
+            if (!$filename || !$email || !$name) {
+                throw new InvalidArgumentException('Missing event data.');
             }
 
-            $extractFramesFromUploadedVideoUseCase->execute(
-                new ExtractFramesFromUploadedVideoInput($filename)
+            dispatch(
+                new QueueableUseCaseJob(
+                    ExtractFramesFromUploadedVideoUseCase::class,
+                    new ExtractFramesFromUploadedVideoInput(
+                        $filename,
+                        new Email($email),
+                        $name
+                    )
+                )
             );
         });
 
