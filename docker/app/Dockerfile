@@ -1,14 +1,29 @@
 FROM serversideup/php:8.4-cli-alpine as base
 
+ENV AUTORUN_ENABLED=true
+ENV AUTORUN_LARAVEL_MIGRATION=true
+ENV AUTORUN_LARAVEL_MIGRATION_ISOLATION=false
+ENV AUTORUN_LARAVEL_CONFIG_CACHE=false
+ENV AUTORUN_LARAVEL_EVENT_CACHE=false
+ENV AUTORUN_LARAVEL_ROUTE_CACHE=false
+ENV AUTORUN_LARAVEL_STORAGE_LINK=false
+ENV AUTORUN_LARAVEL_VIEW_CACHE=false
+
 USER root
 
-COPY ./docker/app/scripts/start-queue.sh /usr/local/bin/start-queue
-RUN chmod +x /usr/local/bin/start-queue
+COPY ./docker/app/supervisord/supervisord.conf /etc/supervisord.conf
+COPY ./docker/app/scripts/healthcheck-messaging /usr/local/bin/healthcheck-messaging
+COPY ./docker/app/scripts/healthcheck /usr/local/bin/healthcheck
+
+RUN docker-php-serversideup-dep-install-alpine supervisor && \
+    docker-php-serversideup-dep-install-alpine ffmpeg && \
+    chmod +x /usr/local/bin/healthcheck-messaging && \
+    chmod +x /usr/local/bin/healthcheck
 
 USER www-data
 
-CMD ["start-queue"]
-HEALTHCHECK CMD "healthcheck-queue"
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+HEALTHCHECK CMD "healthcheck"
 STOPSIGNAL SIGTERM
 
 FROM base as development
@@ -33,6 +48,8 @@ USER www-data
 
 FROM base as production
 
+ENV AUTORUN_LARAVEL_CONFIG_CACHE=true
+ENV AUTORUN_LARAVEL_EVENT_CACHE=true
 ENV PHP_OPCACHE_ENABLE=1
 
 COPY --chown=www-data:www-data . /var/www/html

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+healthcheck-queue
+healthcheck-messaging

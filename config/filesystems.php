@@ -60,6 +60,22 @@ return [
             'report' => false,
         ],
 
+        'videos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/videos'),
+            'url' => env('APP_URL').'/storage/videos',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
+        'temporary' => [
+            'driver' => 'local',
+            'root' => storage_path('app/temporary'),
+            'url' => env('APP_URL').'/storage/temporary',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
     ],
 
     /*
