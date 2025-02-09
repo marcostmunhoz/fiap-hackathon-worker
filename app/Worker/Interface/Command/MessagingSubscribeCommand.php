@@ -3,10 +3,10 @@
 namespace App\Worker\Interface\Command;
 
 use App\Shared\Domain\Enum\EventType;
+use App\Shared\Domain\Service\MessageSubscriberInterface;
 use App\Shared\Domain\ValueObject\Email;
 use App\Worker\Application\DTO\ExtractFramesFromUploadedVideoInput;
 use App\Worker\Application\UseCase\ExtractFramesFromUploadedVideoUseCase;
-use App\Worker\Domain\Service\MessageSubscriberInterface;
 use App\Worker\Interface\Job\QueueableUseCaseJob;
 use Illuminate\Console\Command;
 use InvalidArgumentException;

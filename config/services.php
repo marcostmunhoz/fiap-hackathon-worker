@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'google' => [
+        'project_id' => env('GOOGLE_PROJECT_ID'),
+
+        'pubsub' => [
+            'service_account_key_path' => env('GOOGLE_SERVICE_ACCOUNT_KEY_PATH'),
+            'subscription_id' => env('GOOGLE_PUBSUB_SUBSCRIPTION_ID'),
+        ],
+    ],
 ];

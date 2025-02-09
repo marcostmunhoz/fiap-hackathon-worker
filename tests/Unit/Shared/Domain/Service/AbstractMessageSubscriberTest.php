@@ -3,7 +3,7 @@
 namespace Tests\Unit\Worker\Domain\Service;
 
 use App\Shared\Domain\Enum\EventType;
-use App\Worker\Domain\Service\AbstractMessageSubscriber;
+use App\Shared\Domain\Service\AbstractMessageSubscriber;
 use Exception;
 use Mockery;
 use Psr\Log\LoggerInterface;

@@ -4,7 +4,7 @@ namespace App\Shared\Domain\Data;
 
 use App\Shared\Domain\Enum\EventType;
 use App\Shared\Domain\Exception\InvalidValueException;
-use App\Worker\Domain\Service\MessageSubscriberInterface;
+use App\Shared\Domain\Service\MessageSubscriberInterface;
 
 /**
  * @codeCoverageIgnore

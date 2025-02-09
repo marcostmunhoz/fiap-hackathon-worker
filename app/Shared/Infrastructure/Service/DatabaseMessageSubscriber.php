@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Worker\Infrastructure\Service;
+namespace App\Shared\Infrastructure\Service;
 
 use App\Shared\Domain\Data\Message;
-use App\Worker\Domain\Service\AbstractMessageSubscriber;
+use App\Shared\Domain\Service\AbstractMessageSubscriber;
 use Illuminate\Support\Facades\DB;
 
 /**

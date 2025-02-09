@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Worker\Domain\Service;
+namespace App\Shared\Domain\Service;
 
 use App\Shared\Domain\Enum\EventType;
 use Throwable;

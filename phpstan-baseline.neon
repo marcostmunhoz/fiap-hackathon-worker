@@ -1,19 +1,25 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^PHPDoc tag @var with type string is not subtype of native type non\-empty\-array\|non\-falsy\-string\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: app/Worker/Application/UseCase/ExtractFramesFromUploadedVideoUseCase.php
-
-		-
-			message: '#^PHPDoc tag @var for property App\\Worker\\Domain\\Service\\AbstractMessageSubscriber\:\:\$eventHandlers contains unresolvable type\.$#'
+			message: '#^PHPDoc tag @var for property App\\Shared\\Domain\\Service\\AbstractMessageSubscriber\:\:\$eventHandlers contains unresolvable type\.$#'
 			identifier: property.unresolvableType
 			count: 1
-			path: app/Worker/Domain/Service/AbstractMessageSubscriber.php
+			path: app/Shared/Domain/Service/AbstractMessageSubscriber.php
 
 		-
 			message: '#^While loop condition is always true\.$#'
 			identifier: while.alwaysTrue
 			count: 1
-			path: app/Worker/Infrastructure/Service/DatabaseMessageSubscriber.php
+			path: app/Shared/Infrastructure/Service/DatabaseMessageSubscriber.php
+
+		-
+			message: '#^While loop condition is always true\.$#'
+			identifier: while.alwaysTrue
+			count: 1
+			path: app/Shared/Infrastructure/Service/PubSubMessageSubscriber.php
+
+		-
+			message: '#^PHPDoc tag @var with type string is not subtype of native type non\-empty\-array\|non\-falsy\-string\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: app/Worker/Application/UseCase/ExtractFramesFromUploadedVideoUseCase.php
