@@ -1,4 +1,4 @@
-FROM mysql:8.0 as base
+FROM mysql:8.0 AS base
 
 ENV MYSQL_ROOT_PASSWORD=root
 ENV MYSQL_DATABASE=app

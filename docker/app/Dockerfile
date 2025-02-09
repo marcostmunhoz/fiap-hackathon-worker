@@ -1,4 +1,6 @@
-FROM serversideup/php:8.4-cli-alpine as base
+FROM serversideup/php:8.4-cli-alpine AS base
+
+WORKDIR /var/www/html
 
 ENV AUTORUN_ENABLED=true
 ENV AUTORUN_LARAVEL_MIGRATION=true
@@ -8,6 +10,7 @@ ENV AUTORUN_LARAVEL_EVENT_CACHE=false
 ENV AUTORUN_LARAVEL_ROUTE_CACHE=false
 ENV AUTORUN_LARAVEL_STORAGE_LINK=false
 ENV AUTORUN_LARAVEL_VIEW_CACHE=false
+ENV APP_VERSION=1.0.0
 
 USER root
 
@@ -26,7 +29,7 @@ CMD ["supervisord", "-c", "/etc/supervisord.conf"]
 HEALTHCHECK CMD "healthcheck"
 STOPSIGNAL SIGTERM
 
-FROM base as development
+FROM base AS development
 
 USER root
 
@@ -39,17 +42,37 @@ RUN install-php-extensions xdebug \
   && mkdir -p /opt/phpstorm-coverage \
   && chmod 777 /opt/phpstorm-coverage
 
-ARG USER_ID
-ARG GROUP_ID
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 
 RUN docker-php-serversideup-set-id www-data $USER_ID:$GROUP_ID
 
 USER www-data
 
-FROM base as production
+FROM base AS ci
+
+ENV AUTORUN_ENABLED=false
+
+USER root
+
+RUN install-php-extensions xdebug \
+  && echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+USER www-data
+
+COPY --chown=www-data:www-data . /var/www/html
+
+RUN composer install --no-interaction --no-plugins --no-scripts
+
+FROM base AS production
 
 ENV AUTORUN_LARAVEL_CONFIG_CACHE=true
 ENV AUTORUN_LARAVEL_EVENT_CACHE=true
 ENV PHP_OPCACHE_ENABLE=1
+ENV APP_ENV=production
 
 COPY --chown=www-data:www-data . /var/www/html
+COPY --chown=www-data:www-data ./.env.production /var/www/html/.env
+
+RUN composer install --no-dev --no-interaction --no-plugins --no-scripts &&\
+    composer dump-autoload --optimize

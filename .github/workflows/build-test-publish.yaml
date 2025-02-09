@@ -1,0 +1,114 @@
+name: 'Build, Test and Publish'
+
+on:
+  push:
+    branches: [ 'main' ]
+  pull_request:
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build app
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/app/Dockerfile
+          target: ci
+          tags: worker:${{ github.sha }}
+          load: true
+
+      - name: Run tests
+        run: docker run --rm worker:${{ github.sha }} composer ci
+
+  build:
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [ test ]
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get the version from composer.json
+        id: get_version
+        run: echo "version=$(jq -r '.version' composer.json)" >> $GITHUB_OUTPUT
+
+      - name: Build app
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/app/Dockerfile
+          push: true
+          tags: marcostmunhoz/fiap-hackathon-worker:${{ steps.get_version.outputs.version }}
+
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+  publish:
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [ test, build ]
+
+    permissions:
+      contents: read
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: echo "Deploying version ${{ needs.build.outputs.version }}"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Decode terraform.tfvars
+        run: |
+          echo "${{ secrets.TF_VARS_BASE64 }}" | base64 --decode > terraform.tfvars
+
+      - name: Terraform Init
+        run: terraform init --backend-config="encryption_key=${{ secrets.TF_ENCRYPTION_KEY }}"
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Terraform Plan
+        run: terraform plan -var="app_version=${{ needs.build.outputs.version }}" -var="shared_state_encryption_key=${{ secrets.TF_ENCRYPTION_KEY }}" -var-file=terraform.tfvars
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+#      - name: Terraform Apply
+#        run: terraform apply -auto-approve -var="app_version=${{ needs.build.outputs.version }}" -var="shared_state_encryption_key=${{ secrets.TF_ENCRYPTION_KEY }}" -var-file=terraform.tfvars
+#        env:
+#          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
