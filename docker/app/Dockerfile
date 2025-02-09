@@ -14,6 +14,7 @@ ENV APP_VERSION=1.0.0
 
 USER root
 
+COPY ./docker/app/scripts/start-supervisor /etc/services.d/supervisor/run
 COPY ./docker/app/supervisord/supervisord.conf /etc/supervisord.conf
 COPY ./docker/app/scripts/healthcheck-messaging /usr/local/bin/healthcheck-messaging
 COPY ./docker/app/scripts/healthcheck /usr/local/bin/healthcheck
@@ -21,13 +22,12 @@ COPY ./docker/app/scripts/healthcheck /usr/local/bin/healthcheck
 RUN docker-php-serversideup-dep-install-alpine supervisor && \
     docker-php-serversideup-dep-install-alpine ffmpeg && \
     chmod +x /usr/local/bin/healthcheck-messaging && \
-    chmod +x /usr/local/bin/healthcheck
+    chmod +x /usr/local/bin/healthcheck && \
+    chmod +x /etc/services.d/supervisor/run
 
 USER www-data
 
-CMD ["supervisord", "-c", "/etc/supervisord.conf"]
 HEALTHCHECK CMD "healthcheck"
-STOPSIGNAL SIGTERM
 
 FROM base AS development
 
