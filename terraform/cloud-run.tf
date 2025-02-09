@@ -13,11 +13,6 @@ data "google_service_account" "service_account" {
 }
 
 resource "google_cloud_run_v2_service" "worker_service" {
-  depends_on = [
-    google_secret_manager_secret.worker_mail_username,
-    google_secret_manager_secret.worker_mail_password,
-  ]
-
   name                = "hackathon-worker-service"
   location            = local.google.region
   deletion_protection = false
