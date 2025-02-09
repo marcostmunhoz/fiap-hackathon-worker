@@ -108,7 +108,7 @@ jobs:
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
 
-#      - name: Terraform Apply
-#        run: terraform apply -auto-approve -var="app_version=${{ needs.build.outputs.version }}" -var="shared_state_encryption_key=${{ secrets.TF_ENCRYPTION_KEY }}" -var-file=terraform.tfvars
-#        env:
-#          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var="app_version=${{ needs.build.outputs.version }}" -var="shared_state_encryption_key=${{ secrets.TF_ENCRYPTION_KEY }}" -var-file=terraform.tfvars
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
