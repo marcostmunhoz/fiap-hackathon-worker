@@ -127,7 +127,7 @@ resource "google_cloud_run_service_iam_binding" "default" {
   service  = google_cloud_run_v2_service.worker_service.name
   role     = "roles/run.invoker"
   members = [
-    "allUsers"
+    "serviceAccount:${data.google_service_account.service_account.email}"
   ]
 }
 
@@ -136,6 +136,10 @@ resource "google_cloud_scheduler_job" "worker_heartbeat_scheduler" {
   schedule = "* * * * *"
 
   http_target {
-    uri = google_cloud_run_v2_service.worker_service.uri
+    uri = "${google_cloud_run_v2_service.worker_service.uri}/health"
+
+    oidc_token {
+      service_account_email = data.google_service_account.service_account.email
+    }
   }
 }
