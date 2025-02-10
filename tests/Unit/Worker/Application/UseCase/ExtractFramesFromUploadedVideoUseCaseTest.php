@@ -78,3 +78,7 @@ it('notifies user when video processing fails', function () {
     // When
     $this->sut->execute($input);
 })->throws(Exception::class, 'Some error.');
+
+it('assert true equals false', function () {
+    expect(true)->toBe(false);
+});
