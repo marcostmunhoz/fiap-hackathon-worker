@@ -107,12 +107,6 @@ resource "google_cloud_run_v2_service" "worker_service" {
         name       = "GOOGLE_SERVICE_ACCOUNT_KEY_FILE"
         mount_path = "/secrets"
       }
-
-      liveness_probe {
-        http_get {
-          path = "/health"
-        }
-      }
     }
   }
 
@@ -136,6 +130,7 @@ resource "google_cloud_scheduler_job" "worker_heartbeat_scheduler" {
   schedule = "* * * * *"
 
   http_target {
-    uri = "${google_cloud_run_v2_service.worker_service.uri}/health"
+    uri         = "${google_cloud_run_v2_service.worker_service.uri}/health"
+    http_method = "GET"
   }
 }
