@@ -48,6 +48,13 @@ resource "google_cloud_run_v2_service" "worker_service" {
     containers {
       image = "docker.io/marcostmunhoz/fiap-hackathon-worker:${var.app_version}"
 
+      resources {
+        limits = {
+          cpu    = "1000m"
+          memory = "1Gi"
+        }
+      }
+
       env {
         name  = "APP_VERSION"
         value = var.app_version
